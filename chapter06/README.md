@@ -23,6 +23,11 @@ square和rectangle之间的关系。is-a只是提醒我们，base class的所有
 
 ### Rule33: Avoid hiding inherited names.
 
+- demo-01: 一个正确的例子
+- demo-02: 一个错误的例子(虚函数和非虚函数进行重载，导致hidding inherited names)
+- demo-03: 尝试进行修正
+- demo-04: demo-04和demo-03的区别在于前者一个纯虚函数一个虚函数，后者两个都是虚函数
+
 q:name-hiding rules一个非常重要的原则是什么?
 >名称的类型，并不重要。
 
@@ -208,8 +213,3 @@ Derived::mf4() called.
 - non-virtual functions在基类中重载，派生类不进行redefinition
 - virtual functions(pure and impure)在基类中重载，派生类声明需要重写的。不重写的通过using进行声明
 - 以上两种方法，均是为了avoid inheritated hidding names.
-
-- demo-01: 一个正确的例子
-- demo-02: 一个错误的例子(虚函数和非虚函数进行重载，导致hidding inherited names)
-- demo-03: 尝试进行修正
-- demo-04: demo-04和demo-03的区别在于前者一个纯虚函数一个虚函数，后者两个都是虚函数
