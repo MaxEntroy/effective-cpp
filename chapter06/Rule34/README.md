@@ -4,6 +4,10 @@
 - demo-02: 解决impure virtual的接口和缺省实现分离，提供了一种方法
 - demo-03: 同demo-06，提供了另一种方法
 
+**特别注意的是**，rule34本周上是告诉大家不同函数声明的语义是什么，但是一定要特别注意的是，
+对于impure virtual functions，作者是建议大家把接口和缺省实现进行分离的。我之前
+没有特别注意这一点的是，我觉得这么做相当于没有impure virtual function的存在了，全是pure virtual functions
+
 q:public继承由那两部分组成？
 - function interface inheritance
 - functin implementation inheritance
