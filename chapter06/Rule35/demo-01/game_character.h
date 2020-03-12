@@ -12,8 +12,11 @@ class GameCharacter {
   virtual ~GameCharacter() {}
 
  public:
-  int hv() const {return hv_;}
-  CharacterLevel level() const {return level_;}
+  int hv() const { return hv_; }
+  CharacterLevel level() const { return level_; }
+
+  void set_hv(int hv) { hv_ = hv; }
+  void set_level(CharacterLevel level) { level_ = level; }
 
   // health value is based on:
   // 1. damage type

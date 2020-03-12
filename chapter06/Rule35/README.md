@@ -1,5 +1,19 @@
 ## Rule35: Consider alternatives to virtual functions
 
+### virtual functions
+
+这么做的思路也非常简单。抽象类定义接口，派生类实现接口。
+对于抽象类的设计，有一些更多的思考，参看/demo-01/README.md
+
+```cpp
+// game_character.h
+
+// warrior.h
+
+// warlock.h
+```
+
+
 ### Non-virtual interface
 
 ### Strategy pattern
