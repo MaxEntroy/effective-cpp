@@ -1,3 +1,4 @@
+[TOC]
 ## Rule35: Consider alternatives to virtual functions
 
 ### Virtual interface
@@ -131,17 +132,18 @@ class GameCharacter {
   - 调用的权利还是保留在base class当中
   - ps: pure virtual function在abstract class当中可以被其余member functions调用(确实不好理解，没有定义的函数，为什么能被调用呢？)
 
-  q:NVI idiom的好处我在优点中也提到，但是语义上的优点总感觉理解的不透彻，这么做，在语义上有什么好处？
-  >看了stackover flow上的一段讲解，豁然开朗。
-  >
-  >Because the public interface is non-virtual, all derived classes automatically have logging as well. If instead you would have made SetStateBool and SetStateInt public, you could not have enforced logging for all derived classes.
-  >
-  >So the recommendation to use the NVI idiom is not a syntactic requirement, but it's a tool to enforce the base class semantics (logging, or caching) on all derived classes.
-  >
-  >其实，本质来说，确实是让SetStateBool/SetStateInt更专注于自己的工作。更细节的考虑在于，公共语义还是要放到base class当中，这样来确保derived class都能继承公共语义。
+
+q:NVI idiom的好处我在优点中也提到，但是语义上的优点总感觉理解的不透彻，这么做，在语义上有什么好处？
+>看了stackover flow上的一段讲解，豁然开朗。
+>
+>Because the public interface is non-virtual, all derived classes automatically have logging as well. If instead you would have made SetStateBool and SetStateInt public, you could not have enforced logging for all derived classes.
+>
+>So the recommendation to use the NVI idiom is not a syntactic requirement, but it's a tool to enforce the base class semantics (logging, or caching) on all derived classes.
+>
+>其实，本质来说，确实是让SetStateBool/SetStateInt更专注于自己的工作。更细节的考虑在于，公共语义还是要放到base class当中，这样来确保derived class都能继承公共语义。
 
 ```cpp
-  class Engine
+class Engine
 {
 public:
     void SetState( int var, bool val );
@@ -262,6 +264,135 @@ class Warlock : public GameCharacter {
 前2种方法是strategy的一种分解形式，最后一种是古典strategy
 
 #### 将virtual functions替换为"函数指针成员变量"
+
+- 手法
+  - virtual functons以non-member functions形式提供
+  - 可以定义多个non-member functions来提供某种程度的多态
+  - 类内提供function pointer member，用来接受non-member function
+
+- 优点
+  - 相比于virtual functions提供更强的灵活性(比如derived class对base class的virtual function进行override，只能提供UI个版本，但是non-member functions可以提供多个版本。)
+  - 解耦合。本质上来说是把virtual functions在类内进行抽离
+
+- 缺点
+  - 弱化class 封装。(如果non-member functions需要访问non-public成员时，需要提供friend支持)
+
+- 注意
+  - function pointer的形式可以有多重理解。
+  - 调用关系上，回调。
+  - 语义上，此处的function pointer本质上实现了oo的多态(所以，c语言也完全有能力实现polymorphism)
+
+- 实现
+  - 本例派生类有增加成员的需求，定义派生类无可厚非。否则基类足以。
+  - friend牵扯到头文件相互引用的问题。用forward declarations解决
+
+```cpp
+// game_charecter.h
+#ifndef GAME_CHARACTER_H_
+#define GAME_CHARACTER_H_
+
+#include "common.h"
+
+namespace ec {
+
+// Forward declaration
+class GameCharacter;
+
+// UnderAttack Callback functions
+void WarriorUnderAttack(GameCharacter*, DamageType, int);
+void WarlockUnderAttack(GameCharacter*, DamageType, int);
+
+class GameCharacter {
+ public:
+  typedef void(*DoUnderAttackFunc)(GameCharacter*, DamageType, int);
+  friend void WarriorUnderAttack(GameCharacter*, DamageType, int);
+  friend void WarlockUnderAttack(GameCharacter*, DamageType, int);
+
+ public:
+  GameCharacter() : hv_(0), level_(kJunior), do_under_attack_(nullptr) {}
+  GameCharacter(int hv, CharacterLevel level, DoUnderAttackFunc func) : hv_(hv), level_(level), do_under_attack_(func) {}
+  virtual ~GameCharacter() {}
+
+ public:
+  int hv() const { return hv_; }
+  CharacterLevel level() const { return level_; }
+
+  void set_hv(int hv) { hv_ = hv; }
+  void set_level(CharacterLevel level) { level_ = level; }
+
+  DoUnderAttackFunc do_under_attack() const {return do_under_attack_;}
+  void set_do_under_attack(DoUnderAttackFunc func) {do_under_attack_ = func;}
+
+  // health value is based on:
+  // 1. damage type
+  // 2. damage value
+  // 3. character level
+  void UnderAttack(DamageType damage_type, int damage_value);
+
+ protected:
+  int hv_;
+  CharacterLevel level_;
+  DoUnderAttackFunc do_under_attack_;
+};
+
+} // namespace ec
+
+#endif // GAME_CHARACTER_H_
+
+// warrior.h
+#ifndef WARRIOR_H_
+#define WARRIOR_H_
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warrior : public GameCharacter {
+ public:
+  Warrior() : GameCharacter(), age_(0) {}
+  Warrior(int hv, CharacterLevel level, DoUnderAttackFunc func, int age)
+    : GameCharacter(hv, level, func), age_(age) {}
+
+ public:
+  int age() const {return age_;}
+  void set_age(int a) {age_ = a;}
+
+ private:
+  int age_;
+};
+
+} // namespace ec
+
+#endif // WARRIOR_H_
+
+// warlock.h
+#ifndef WARLOCK_H_
+#define WARLOCK_H_
+
+#include <string>
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warlock : public GameCharacter {
+ public:
+  Warlock() : GameCharacter() {}
+  Warlock(int hv, CharacterLevel level, DoUnderAttackFunc func, const std::string& g)
+    : GameCharacter(hv, level, func), gender_(g) {}
+
+ public:
+  std::string gender() const {return gender_;}
+  void set_gender(const std::string& g) {gender_ = g;}
+
+ private:
+  std::string gender_;
+};
+
+} // namespace ec
+
+#endif // WARLOCK_H_
+```
 
 #### 将virtual functions替换为"std::function成员变量"
 
