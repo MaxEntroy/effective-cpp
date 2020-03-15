@@ -557,3 +557,12 @@ class Warlock : public GameCharacter {
 #### 将virtual functions替换为"另一个继承体系当中的virtual functions"
 
 ### 总结
+
+我想本节的主要意图还是想告诉大家，当我们面对**多态**问题时，有如下的几种选择
+
+- Virtual Interface(virtual functions)。首选方法，语义简单。如果虚函数不是为了多态而生，那它还有什么用
+- Non-virtual Interface。
+  - base class提供non-virtual interface，负责调用时机。具体来说，做一些准备和善后的工作，让虚函数专注自己的逻辑。否则，每一个继承的派生类在override时，都需要做准备和善后的工作。
+  - base class提供private virtual interface.
+- Strategy Pattern
+  - 解耦合。通过另一组设计来实现多态，client通过回调的形式实现真正的多态逻辑。
