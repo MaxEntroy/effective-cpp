@@ -4,7 +4,7 @@ cc_binary(
     "main.cc"
   ],
   deps = [
-    "//demo-03:main_lib"
+    "//demo-04:main_lib"
   ]
 )
 
@@ -12,8 +12,19 @@ cc_library(
   name = "main_lib",
   srcs = [
     "game_character.cc",
+    "under_attack_wrapper.cc"
   ],
   deps = []
+)
+
+cc_test(
+  name = "under_attack_wrapper_test",
+  srcs = [
+    "under_attack_wrapper_test.cc"
+  ],
+  deps = [
+    "//demo-04:main_lib"
+  ]
 )
 
 cc_test(
@@ -22,7 +33,7 @@ cc_test(
     "warrior_test.cc",
   ],
   deps = [
-    "//demo-03:main_lib"
+    "//demo-04:main_lib"
   ]
 )
 
@@ -32,6 +43,6 @@ cc_test(
     "warlock_test.cc",
   ],
   deps = [
-    "//demo-03:main_lib"
+    "//demo-04:main_lib"
   ]
 )

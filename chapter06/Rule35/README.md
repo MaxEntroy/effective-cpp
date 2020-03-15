@@ -396,6 +396,164 @@ class Warlock : public GameCharacter {
 
 #### 将virtual functions替换为"std::function成员变量"
 
+- 手法
+  - 同上
+
+- 优点
+  - 设计上同上。
+  - std::function vs functions pointers
+    - 为什么计算生命值的计算逻辑必须是函数？
+    - 如果一定是函数，为什么不能是一个成员函数？
+    - 为什么一定得返回int而不是任何可被转化为int的类型(这个是书上的设计，我以为质疑的有理，我的实现是void)
+    - 本质上来说，function pointers是c的常用做法，但是cpp则使用std::function来表达可调用对象这样的概念
+      - 因为cpp中不是只有function这一种可调用对象
+      - 并且std::function含有类型信息
+
+- 缺点
+  - 同上
+
+- 实现
+  - 增加UnderAttackWrapper，封装计算方法。解耦合。
+  - GameCharacter为游戏基本任务。依赖UnderAttackWrapper.
+  - Warlock and Warrior 继承GameCharacter，增加自己的角色属性
+
+- 注意
+  - std::bind的用法，有别于std::function提供的通用可调用对象能力
+  - std::bind在本例的使用，主要是对函数进行某种形式的转化，使它不再接受4个参数，而是3个参数。从而可以当做实参传递给GameCharacter
+
+```cpp
+// under_attack_warpper.h
+#ifndef UNDER_ATTACK_WRAPPER_H_
+#define UNDER_ATTACK_WRAPPER_H_
+
+#include "common.h"
+
+namespace ec {
+
+class UnderAttackWrapper {
+ public:
+  UnderAttackWrapper() {}
+
+ public:
+  // 物理基础伤害
+  // 1.物理伤害不加倍
+  // 2.魔法伤害根据角色等级加成
+  int UnderAttackOnPhysical(DamageType damage_type,
+                            CharacterLevel level,
+                            int damage_value);
+
+  // 魔法基础伤害
+  // 1.魔法伤害不加倍
+  // 2.物理伤害根据角色等级加成
+  int UnderAttackOnMagic(DamageType damage_type,
+                         CharacterLevel level,
+                         int damage_value);
+};
+
+} // namespace ec
+
+#endif // UNDER_ATTACK_WRAPPER_H_
+
+// game_character.h
+#ifndef GAME_CHARACTER_H_
+#define GAME_CHARACTER_H_
+
+#include <functional>
+
+#include "common.h"
+
+namespace ec {
+
+class GameCharacter {
+ public:
+  typedef std::function<int(DamageType, CharacterLevel, int)> DoUnderAttackFunc;
+
+ public:
+  GameCharacter() : hv_(0), level_(kJunior), do_under_attack_(nullptr) {}
+  GameCharacter(int hv, CharacterLevel level, DoUnderAttackFunc func) : hv_(hv), level_(level), do_under_attack_(func) {}
+  virtual ~GameCharacter() {}
+
+ public:
+  int hv() const { return hv_; }
+  void set_hv(int hv) { hv_ = hv; }
+
+  CharacterLevel level() const { return level_; }
+  void set_level(CharacterLevel level) { level_ = level; }
+
+  DoUnderAttackFunc do_under_attack() const {return do_under_attack_;}
+  void set_do_under_attack(DoUnderAttackFunc func) {do_under_attack_ = func;}
+
+  // health value is based on:
+  // 1. damage type
+  // 2. damage value
+  // 3. character level
+  void UnderAttack(DamageType damage_type, int damage_value);
+
+ protected:
+  int hv_;
+  CharacterLevel level_;
+  DoUnderAttackFunc do_under_attack_;
+};
+
+} // namespace ec
+
+#endif // GAME_CHARACTER_H_
+
+// warrior.h
+#ifndef WARRIOR_H_
+#define WARRIOR_H_
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warrior : public GameCharacter {
+ public:
+  Warrior() : GameCharacter(), age_(0) {}
+  Warrior(int hv, CharacterLevel level, DoUnderAttackFunc func, int age)
+    : GameCharacter(hv, level, func), age_(age) {}
+
+ public:
+  int age() const {return age_;}
+  void set_age(int a) {age_ = a;}
+
+ private:
+  int age_;
+};
+
+} // namespace ec
+
+#endif // WARRIOR_H_
+
+// warlock.h
+#ifndef WARLOCK_H_
+#define WARLOCK_H_
+
+#include <string>
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warlock : public GameCharacter {
+ public:
+  Warlock() : GameCharacter() {}
+  Warlock(int hv, CharacterLevel level, DoUnderAttackFunc func, const std::string& g)
+    : GameCharacter(hv, level, func), gender_(g) {}
+
+ public:
+  std::string gender() const {return gender_;}
+  void set_gender(const std::string& g) {gender_ = g;}
+
+ private:
+  std::string gender_;
+};
+
+} // namespace ec
+
+#endif // WARLOCK_H_
+```
+
 #### 将virtual functions替换为"另一个继承体系当中的virtual functions"
 
 ### 总结
