@@ -556,6 +556,178 @@ class Warlock : public GameCharacter {
 
 #### 将virtual functions替换为"另一个继承体系当中的virtual functions"
 
+- 手法
+  - 标准strategy pattern
+  - 提供一个Algorithm Interface, Context当中依赖该对象的基类指针
+
+- 优点
+  - 设计上同上，解耦合。把一个继承体系当中的虚函数抽出来，CalRealDamage更加独立。
+  - 以上两种办法分别提供一组function list和member function list，本次提供一组继承体系当中的虚函数。
+
+- 缺点
+  - 同上
+
+- 注意
+  - Context Interface依赖Algorithm Interface对象的基类指针，本例的实现只接受栈对象地址，堆对象就需要考虑析构回收资源的问题
+
+- 实现
+```cpp
+// under_attack.h
+#ifndef UNDER_ATTACK_H_
+#define UNDER_ATTACK_H_
+
+#include "common.h"
+
+namespace ec {
+
+class UnderAttack {
+ public:
+  virtual ~UnderAttack() {}
+
+ public:
+  virtual int CalRealDamage(DamageType damage_type, CharacterLevel level, int damage_value) const = 0;
+};
+
+} // namespace ec
+
+#endif // UNDER_ATTACK_H_
+
+// under_attack_on_physical.h
+#ifndef UNDER_ATTACK_ON_PHYSICAL_H_
+#define UNDER_ATTACK_ON_PHYSICAL_H_
+
+#include "under_attack.h"
+
+namespace ec {
+
+class UnderAttackOnPhysical : public UnderAttack {
+ public:
+  int CalRealDamage(DamageType damage_type, CharacterLevel level, int damage_value) const override;
+};
+
+} // namespace ec
+
+
+#endif // UNDER_ATTACK_ON_PHYSICAL_H_
+
+// under_attack_on_magic.h
+#ifndef UNDER_ATTACK_ON_MAGIC_H_
+#define UNDER_ATTACK_ON_MAGIC_H_
+
+#include "under_attack.h"
+
+namespace ec {
+
+class UnderAttackOnMagic : public UnderAttack {
+ public:
+  int CalRealDamage(DamageType damage_type, CharacterLevel level, int damage_value) const override;
+};
+
+} // namespace ec
+
+#endif // UNDER_ATTACK_ON_MAGIC_H_
+
+// game_character.h
+#ifndef GAME_CHARACTER_H_
+#define GAME_CHARACTER_H_
+
+#include "common.h"
+#include "under_attack.h"
+
+namespace ec {
+
+class GameCharacter {
+ public:
+  typedef UnderAttack* PtrUnderAttack;
+
+ public:
+  GameCharacter() : hv_(0), level_(kJunior), attack_ptr_(nullptr) {}
+  GameCharacter(int hv, CharacterLevel level, PtrUnderAttack attack_ptr) : hv_(hv), level_(level), attack_ptr_(attack_ptr) {}
+  virtual ~GameCharacter() {}
+
+ public:
+  int hv() const { return hv_; }
+  void set_hv(int hv) { hv_ = hv; }
+
+  CharacterLevel level() const { return level_; }
+  void set_level(CharacterLevel level) { level_ = level; }
+
+  PtrUnderAttack attack_ptr() const {return attack_ptr_;}
+  void set_attack_ptr(PtrUnderAttack attack_ptr) {attack_ptr_ = attack_ptr;}
+
+  // health value is based on:
+  // 1. damage type
+  // 2. damage value
+  // 3. character level
+  void DoUnderAttack(DamageType damage_type, int damage_value);
+
+ protected:
+  int hv_;
+  CharacterLevel level_;
+  PtrUnderAttack attack_ptr_;
+};
+
+} // namespace ec
+
+#endif // GAME_CHARACTER_H_
+
+// warrior.h
+#ifndef WARLOCK_H_
+#define WARLOCK_H_
+
+#include <string>
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warlock : public GameCharacter {
+ public:
+  Warlock() : GameCharacter() {}
+  Warlock(int hv, CharacterLevel level, PtrUnderAttack attack_ptr, const std::string& g)
+    : GameCharacter(hv, level, attack_ptr), gender_(g) {}
+
+ public:
+  std::string gender() const {return gender_;}
+  void set_gender(const std::string& g) {gender_ = g;}
+
+ private:
+  std::string gender_;
+};
+
+} // namespace ec
+
+#endif // WARLOCK_H_
+
+// warlock.h
+#ifndef WARLOCK_H_
+#define WARLOCK_H_
+
+#include <string>
+
+#include "game_character.h"
+
+namespace ec {
+
+class Warlock : public GameCharacter {
+ public:
+  Warlock() : GameCharacter() {}
+  Warlock(int hv, CharacterLevel level, PtrUnderAttack attack_ptr, const std::string& g)
+    : GameCharacter(hv, level, attack_ptr), gender_(g) {}
+
+ public:
+  std::string gender() const {return gender_;}
+  void set_gender(const std::string& g) {gender_ = g;}
+
+ private:
+  std::string gender_;
+};
+
+} // namespace ec
+
+#endif // WARLOCK_H_
+```
+
 ### 总结
 
 我想本节的主要意图还是想告诉大家，当我们面对**多态**问题时，有如下的几种选择
