@@ -15,23 +15,15 @@ cc_config(
   extra_incs = [
   ],
   linkflags = [
-    "-Wl,-all_load"
   ]
 )
 
 cc_test_config(
   gtest_libs = [
-    "#gtest"
+    "#gtest",
+    "#pthread",
   ],
   gtest_main_libs = [
     "#gtest_main"
   ]
-)
-
-proto_library_config(
-  protoc = "/usr/local/thirdparty/protobuf-3.11.0/bin/protoc",
-  protobuf_libs = [
-    "#protobuf"
-  ],
-  protobuf_incs = "/usr/local/thirdparty/protobuf-3.11.0/include"
 )

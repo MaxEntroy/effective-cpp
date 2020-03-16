@@ -11,22 +11,32 @@ cc_binary(
 cc_library(
   name = "main_lib",
   srcs = [
-    "game_character.cc",
-    "under_attack_wrapper.cc"
+    "under_attack_on_physical.cc",
+    "under_attack_on_magic.cc",
+    "game_character.cc"
   ],
   deps = []
 )
 
 cc_test(
-  name = "under_attack_wrapper_test",
+  name = "under_attack_on_physical_test",
   srcs = [
-    "under_attack_wrapper_test.cc"
+    "under_attack_on_physical_test.cc"
   ],
   deps = [
     "//demo-05:main_lib"
   ]
 )
 
+cc_test(
+  name = "under_attack_on_magic_test",
+  srcs = [
+    "under_attack_on_magic_test.cc"
+  ],
+  deps = [
+    "//demo-05:main_lib"
+  ]
+)
 cc_test(
   name = "warrior_test",
   srcs = [

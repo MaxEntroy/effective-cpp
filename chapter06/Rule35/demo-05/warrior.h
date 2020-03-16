@@ -8,8 +8,8 @@ namespace ec {
 class Warrior : public GameCharacter {
  public:
   Warrior() : GameCharacter(), age_(0) {}
-  Warrior(int hv, CharacterLevel level, DoUnderAttackFunc func, int age)
-    : GameCharacter(hv, level, func), age_(age) {}
+  Warrior(int hv, CharacterLevel level, PtrUnderAttack attack_ptr, int age)
+    : GameCharacter(hv, level, attack_ptr), age_(age) {}
 
  public:
   int age() const {return age_;}

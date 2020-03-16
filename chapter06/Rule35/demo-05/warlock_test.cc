@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "warlock.h"
-#include "under_attack_wrapper.h"
+#include "under_attack_on_magic.h"
 
 using namespace ec;
 
@@ -10,23 +10,23 @@ class WarlockTest : public ::testing::Test {
   void SetUp() override {
     w1.set_hv(100);
     w1.set_level(kJunior);
-    w1.set_do_under_attack(std::bind(&UnderAttackWrapper::UnderAttackOnMagic, &uaw, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    w1.set_attack_ptr(&uam);
     w1.set_gender("male");
 
     w2.set_hv(100);
     w2.set_level(kIntermediate);
-    w2.set_do_under_attack(std::bind(&UnderAttackWrapper::UnderAttackOnMagic, &uaw, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    w2.set_attack_ptr(&uam);
     w2.set_gender("female");
 
     w3.set_hv(100);
     w3.set_level(kSenior);
-    w3.set_do_under_attack(std::bind(&UnderAttackWrapper::UnderAttackOnMagic, &uaw, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    w3.set_attack_ptr(&uam);
     w3.set_gender("male");
   }
   // void TearDown() override {}
 
   // Declare any objects you plan to use
-  UnderAttackWrapper uaw;
+  UnderAttackOnMagic uam;
   Warlock w0;
   Warlock w1;
   Warlock w2;
@@ -47,8 +47,11 @@ TEST_F(WarlockTest, LevelWorks) {
   EXPECT_EQ(w3.level(), kSenior);
 }
 
-TEST_F(WarlockTest, DoUnderAttackWorks) {
-  EXPECT_EQ(w0.do_under_attack(), nullptr);
+TEST_F(WarlockTest, AttackPtrWorks) {
+  EXPECT_EQ(w0.attack_ptr(), nullptr);
+  EXPECT_EQ(w1.attack_ptr(), &uam);
+  EXPECT_EQ(w2.attack_ptr(), &uam);
+  EXPECT_EQ(w3.attack_ptr(), &uam);
 }
 
 TEST_F(WarlockTest, GenderWorks) {
@@ -69,8 +72,8 @@ TEST_F(WarlockTest, SetLevelWorks) {
 }
 
 TEST_F(WarlockTest, SetDoUnderAttack) {
-  w1.set_do_under_attack(nullptr);
-  EXPECT_EQ(w1.do_under_attack(), nullptr);
+  w1.set_attack_ptr(nullptr);
+  EXPECT_EQ(w1.attack_ptr(), nullptr);
 }
 
 TEST_F(WarlockTest, SetGender) {
@@ -78,24 +81,24 @@ TEST_F(WarlockTest, SetGender) {
   EXPECT_EQ(w0.gender(), "male");
 }
 
-TEST_F(WarlockTest, UnderAttackWithPhysical) {
-  w1.UnderAttack(kPhysical, 10);
+TEST_F(WarlockTest, DoUnderAttackOnPhysical) {
+  w1.DoUnderAttack(kPhysical, 10);
   EXPECT_EQ(w1.hv(), 60);
 
-  w2.UnderAttack(kPhysical, 10);
+  w2.DoUnderAttack(kPhysical, 10);
   EXPECT_EQ(w2.hv(), 70);
 
-  w3.UnderAttack(kPhysical, 10);
+  w3.DoUnderAttack(kPhysical, 10);
   EXPECT_EQ(w3.hv(), 80);
 }
 
-TEST_F(WarlockTest, UnderAttackWithMagic) {
-  w1.UnderAttack(kMagic, 10);
+TEST_F(WarlockTest, DoUnderAttackWithMagic) {
+  w1.DoUnderAttack(kMagic, 10);
   EXPECT_EQ(w1.hv(), 90);
 
-  w2.UnderAttack(kMagic, 10);
+  w2.DoUnderAttack(kMagic, 10);
   EXPECT_EQ(w2.hv(), 90);
 
-  w3.UnderAttack(kMagic, 10);
+  w3.DoUnderAttack(kMagic, 10);
   EXPECT_EQ(w3.hv(), 90);
 }

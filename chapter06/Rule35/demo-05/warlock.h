@@ -10,8 +10,8 @@ namespace ec {
 class Warlock : public GameCharacter {
  public:
   Warlock() : GameCharacter() {}
-  Warlock(int hv, CharacterLevel level, DoUnderAttackFunc func, const std::string& g)
-    : GameCharacter(hv, level, func), gender_(g) {}
+  Warlock(int hv, CharacterLevel level, PtrUnderAttack attack_ptr, const std::string& g)
+    : GameCharacter(hv, level, attack_ptr), gender_(g) {}
 
  public:
   std::string gender() const {return gender_;}
