@@ -17,6 +17,7 @@ q:Rule36为什么说和Rule32,Rule33,Rule34是一脉相承的?
 
 我们再多讨论一点，在Rule34当中,我们从继承语义的角度说明了接口之间的差异，下面我们从另一个角度再进行讨论。
 我们先来回顾Rule34的讨论。
+
 q:derived class当中的继承语义有哪些？
 - 只继承函数接口
 - 同时继承函数接口和实现，并能进行重写
@@ -32,6 +33,7 @@ q:c++当中是如何通过语法特性来支持上述继承语义的？
 - 声明一个non-virtual function的目的，让derived class继承接口和强制性实现
 
 我们从另一个角度来理解
+
 q:non-virtual function和virtual function(include pure virtual function)语义上有何区别?
 - non-virtual function体现接口的不变性
 - virtual function体现接口的特异性
