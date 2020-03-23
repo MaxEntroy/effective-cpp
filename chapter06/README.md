@@ -16,4 +16,6 @@
 
 ### Rule38: Model "has-a" or "is-implementated-in-terms-of" through composition.
 
-### Rule39: User private inheritance judiously.
+### Rule39: Use private inheritance judiously.
+
+### Rule40: Use multiple inheritance judiously.
