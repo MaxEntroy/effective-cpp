@@ -13,3 +13,9 @@
 ### Rule36: Never redefine an inherited non-virtual function.
 
 ### Rule37: Never redefine a function's inherited default parameter value.
+
+### Rule38: Model "has-a" or "is-implementated-in-terms-of" through composition.
+
+### Rule39: Use private inheritance judiously.
+
+### Rule40: Use multiple inheritance judiously.
